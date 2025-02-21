@@ -12,6 +12,7 @@ server.on("connection", (socket: WebSocket) => {
     let data: ConnectionPayload | null;
     try {
       data = JSON.parse(data_.toString());
+      console.log("roomId = "+ data?.roomId);
     } catch (e) {
       socket.close(1000, "Invalid Payload");
       return;
@@ -29,3 +30,4 @@ server.on("connection", (socket: WebSocket) => {
     gameManager.removeUser(socket, "User left the game.");
   })
 });
+

@@ -1,6 +1,6 @@
-import {Chess} from 'chess.js'
-import {InGamePayload, MessageType, MoveTypes} from "./types";
-import {RawData, WebSocket} from "ws";
+import { Chess } from "chess.js";
+import { InGamePayload, MessageType, MoveTypes } from "./types";
+import { RawData, WebSocket } from "ws";
 
 class Game {
   public roomId: string;
@@ -14,9 +14,7 @@ class Game {
   }
 
   findUser(socket: WebSocket) {
-    return (
-      this.player1 === socket || this.player2 === socket
-    );
+    return this.player1 === socket || this.player2 === socket;
   }
 
   addUser(socket: WebSocket) {
@@ -24,7 +22,7 @@ class Game {
       return;
     }
 
-    if (this.player1){
+    if (this.player1) {
       this.player2 = socket;
       this.startGame();
     } else {
@@ -37,14 +35,13 @@ class Game {
       return;
     }
     let leaveSocket: WebSocket | undefined;
-    if (this.player1 === socket){
+    if (this.player1 === socket) {
       leaveSocket = this.player2;
     } else {
       leaveSocket = this.player1;
     }
 
-    if (!leaveSocket)
-      return;
+    if (!leaveSocket) return;
 
     leaveSocket.close(1000, "User left the game.");
   }
@@ -53,29 +50,35 @@ class Game {
     if (!socket) {
       return;
     }
-    socket.send(JSON.stringify({
-      type: messageType,
-      message
-    }));
+    socket.send(
+      JSON.stringify({
+        type: messageType,
+        message,
+      })
+    );
   }
 
   startGame() {
     if (!this.player1 || !this.player2) {
-      return
+      return;
     }
 
     this.player1.on("message", (data) => {
-      this.handleMessage(data, this.player1, this.player2);
+      if (this.player1 && this.player2)
+        this.handleMessage(data, this.player1, this.player2);
     });
 
     this.player2.on("message", (data) => {
-      this.handleMessage(data, this.player2, this.player1);
+      if (this.player1 && this.player2)
+        this.handleMessage(data, this.player2, this.player1);
     });
   }
 
   endGame() {
-    this.send(this.player1, MessageType.SUCCESS_MESSAGE, "Game ended.");
-    this.send(this.player2, MessageType.SUCCESS_MESSAGE, "Game ended.");
+    if (this.player1 && this.player2) {
+      this.send(this.player1, MessageType.SUCCESS_MESSAGE, "Game ended.");
+      this.send(this.player2, MessageType.SUCCESS_MESSAGE, "Game ended.");
+    }
   }
 
   handleMessage(data_: RawData, socket: WebSocket, enemySocket: WebSocket) {
@@ -107,13 +110,13 @@ class Game {
       case MoveTypes.REGULAR:
         break;
       case MoveTypes.GET_BOARD:
-        const board = chess.board()
+        const board = chess.board();
         this.send(socket, MessageType.SUCCESS_MESSAGE, board);
         return;
     }
 
     try {
-      chess.move({from: data.from, to: data.to});
+      chess.move({ from: data.from, to: data.to });
     } catch (e) {
       console.error(e);
       this.send(socket, MessageType.ERROR_MESSAGE, "Illegal Move.");
