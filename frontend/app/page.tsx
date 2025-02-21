@@ -13,7 +13,6 @@ const Home = () => {
       if(!socket){
         console.log("Socket not connected");
       }
-      
     },[socket])
 
     const joinRoom = ()=>{
@@ -35,9 +34,9 @@ const Home = () => {
         <button onClick={joinRoom} className="bg-green-600 w-fit text-white px-8 py-4 text-4xl mt-4 rounded-lg shadow-md hover:shadow-xl ">
           Join
         </button>
-        <div>
-          <ChessBoard setBoard = {setBoard} board= {board} chess={chess}/>
-        </div>
+        {socket && <div>
+          <ChessBoard socket={socket} setBoard = {setBoard} board= {board} chess={chess}/>
+        </div>}
       </div>
     </div>
   );

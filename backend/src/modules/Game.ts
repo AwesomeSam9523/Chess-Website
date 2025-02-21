@@ -93,6 +93,7 @@ class Game {
     if (!data) {
       return;
     }
+    console.log(data)
     const moveNumber = chess.moveNumber();
     console.log(moveNumber);
 

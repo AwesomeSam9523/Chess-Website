@@ -5,6 +5,7 @@ import GameManager from "./modules/GameManager";
 const server = new WebSocketServer({port: 8080});
 const gameManager = new GameManager();
 
+
 server.on("connection", (socket: WebSocket) => {
   console.log("Socket connected");
 

@@ -78,6 +78,7 @@ class Game {
         if (!data) {
             return;
         }
+        console.log(data);
         const moveNumber = chess.moveNumber();
         console.log(moveNumber);
         const color = moveNumber % 2 ? "b" : "w";

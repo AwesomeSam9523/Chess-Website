@@ -6,6 +6,7 @@ export default function ChessBoard({
   board,
   chess,
   setBoard,
+  socket,
 }: {
   board: ({
     square: Square;
@@ -14,6 +15,7 @@ export default function ChessBoard({
   } | null)[][];
   chess: any;
   setBoard: any;
+  socket: WebSocket;
 }) {
   const [from, setFrom] = useState<string | null>(null);
   const [to, setTo] = useState<string | null>(null);
@@ -30,13 +32,20 @@ export default function ChessBoard({
       setFrom(notation);
     } else {
       try {
-        
-          chess.move({ from: from, to: notation });
-          setBoard(chess.board());
-          console.log({
+        socket.send(
+          JSON.stringify({
+            moveType: 0,
             from: from,
             to: notation,
-          });
+          })
+        );
+
+        chess.move({ from: from, to: notation });
+        setBoard(chess.board());
+        console.log({
+          from: from,
+          to: notation,
+        });
         setTo(null);
         setFrom(null);
       } catch (err) {
