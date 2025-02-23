@@ -9,21 +9,24 @@ const Home = () => {
   const socket = useSocket();
   const [roomId, setRoomId] = useState<string | null>(null);
   useEffect(() => {
+    let flag= 0;
     if (!socket) {
       console.log("Socket not connected");
     } else {
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
+        console.log("Data is "  + JSON.stringify(data));
         console.log(JSON.stringify(data));
         if (data.type == 0 && !data.message.board) {          
           console.log("Game Started");
         }
-        if(data.message.board){
+        if(data.message && flag ===1 && data.message!="Illegal Move"){
           console.log("Board Updated");
-          // setBoard(data.message.board);
+          setBoard(data.message);
           chess.move(data.message.move);
-          
+          flag = 1;
         }
+
       };
     }
   }, [socket,chess]);
