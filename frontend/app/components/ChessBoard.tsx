@@ -45,8 +45,8 @@ export default function ChessBoard({
           })
         );
 
-        // chess.move({ from: from, to: notation });
-        // setBoard(chess.board());
+        chess.move({ from: from, to: notation });
+        setBoard(chess.board());
         // console.log({
         //   from: from,
         //   to: notation,
