@@ -17,6 +17,11 @@ export default function ChessBoard({
   setBoard: any;
   socket: WebSocket;
 }) {
+
+    
+    
+
+    
   const [from, setFrom] = useState<string | null>(null);
   const [to, setTo] = useState<string | null>(null);
 
@@ -34,18 +39,18 @@ export default function ChessBoard({
       try {
         socket.send(
           JSON.stringify({
-            moveType: 0,
+            moveType: 3,
             from: from,
             to: notation,
           })
         );
 
-        chess.move({ from: from, to: notation });
-        setBoard(chess.board());
-        console.log({
-          from: from,
-          to: notation,
-        });
+        // chess.move({ from: from, to: notation });
+        // setBoard(chess.board());
+        // console.log({
+        //   from: from,
+        //   to: notation,
+        // });
         setTo(null);
         setFrom(null);
       } catch (err) {
@@ -70,10 +75,10 @@ export default function ChessBoard({
                   (rowIndex + columnIndex) % 2 === 0
                     ? "bg-[#c3a082]"
                     : "bg-[#f2e1c3]"
-                } text-black border border-black`}
+                } text-xl border border-black`}
                 key={columnIndex}
               >
-                {square?.type}
+                {square?.color=="w" ?<div className="text-black">{square?.type}</div>:<div className="text-green-800">{square?.type}</div>}
               </button>
             ))}
           </div>
