@@ -4,7 +4,7 @@ import { useSocket } from "./hooks/useSocket";
 import ChessBoard from "./components/ChessBoard";
 import { Chess } from "chess.js";
 const Home = () => {
-  const [chess, setChess] = useState(new Chess());
+    const [chess, setChess] = useState(new Chess());
   const [board, setBoard] = useState(chess.board());
   const socket = useSocket();
   const [roomId, setRoomId] = useState<string | null>(null);
@@ -15,13 +15,12 @@ const Home = () => {
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
         console.log(JSON.stringify(data));
-        if (data.type === 0 ) {
-          // setBoard(chess.board())          
+        if (data.type == 0 && !data.message.board) {          
           console.log("Game Started");
         }
-        if(data.message){
+        if(data.message.board){
           console.log("Board Updated");
-          setBoard(data.message);
+          // setBoard(data.message.board);
           chess.move(data.message.move);
           
         }
