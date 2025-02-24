@@ -16,20 +16,17 @@ enum ResponseType {
   MOVE = 2,
 }
 
-interface ConnectionPayload {
-  roomId: string;
-}
-
-interface InGamePayload {
-  moveType: MoveTypes;
-  from: string | undefined;
-  to: string | undefined;
+interface ServerResponse {
+  type: MessageType;
+  responseType: ResponseType;
+  message: any;
 }
 
 export {
   MoveTypes,
-  ConnectionPayload,
-  InGamePayload,
   MessageType,
-  ResponseType,
+  ResponseType
 };
+
+export type { ServerResponse };
+

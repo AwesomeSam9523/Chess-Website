@@ -1,6 +1,6 @@
-import { Chess } from "chess.js";
-import { InGamePayload, MessageType, MoveTypes } from "./types";
-import { RawData, WebSocket } from "ws";
+import {Chess} from "chess.js";
+import {InGamePayload, MessageType, MoveTypes, ResponseType} from "./types";
+import {RawData, WebSocket} from "ws";
 
 class Game {
   public roomId: string;
@@ -48,23 +48,43 @@ class Game {
     leaveSocket.close(1000, "User left the game.");
   }
 
-  send(socket: WebSocket, messageType: MessageType, message: any) {
+  send(
+    socket: WebSocket,
+    messageType: MessageType,
+    message: any,
+    responseType: ResponseType = ResponseType.INFO
+  ) {
     if (!socket) {
       return;
     }
     socket.send(
       JSON.stringify({
         type: messageType,
+        responseType,
         message,
-        history: this.chess.history(),
       })
     );
+  }
+
+  sendBoard() {
+    if (this.player1 && this.player2) {
+      const whiteBoard = this.chess.board();
+      const blackBoard = [];
+      for (let i = whiteBoard.length - 1; i >= 0; i--) {
+        const newArr = Array.from(whiteBoard[i]);
+        blackBoard.push(newArr.reverse());
+      }
+      this.send(this.player1, MessageType.SUCCESS_MESSAGE, {board: whiteBoard, history: this.chess.history(), color: "w"}, ResponseType.BOARD);
+      this.send(this.player2, MessageType.SUCCESS_MESSAGE, {board: blackBoard, history: this.chess.history(), color: "b"}, ResponseType.BOARD);
+    }
   }
 
   startGame() {
     if (!this.player1 || !this.player2) {
       return;
     }
+
+    console.log("game started in roomId", this.roomId);
 
     this.player1.on("message", (data) => {
       if (this.player1 && this.player2)
@@ -75,10 +95,8 @@ class Game {
       if (this.player1 && this.player2)
         this.handleMessage(data, this.player2, this.player1);
     });
-    if (this.player1 && this.player2) {
-      this.send(this.player1, MessageType.SUCCESS_MESSAGE, "game started");
-      this.send(this.player2, MessageType.SUCCESS_MESSAGE, "game started");
-    }
+
+    this.sendBoard()
   }
 
   endGame() {
@@ -101,22 +119,15 @@ class Game {
       this.send(socket, MessageType.ERROR_MESSAGE, "No data received.");
       return;
     }
-  
+
     const moveNumber = chess.history().length;
-    const color = moveNumber % 2 ? "b" : "w";
-  
-    try {
-      const move = chess.move({ from: data.from, to: data.to });
-      if (!move) {
-        this.send(socket, MessageType.ERROR_MESSAGE, "Illegal Move.");
-        return;
-      }
-    } catch (e) {
-      console.error(e);
-      this.send(socket, MessageType.ERROR_MESSAGE, "Illegal Move.");
+    const color = socket === this.player1 ? "w" : "b";
+    console.log(moveNumber, color, chess.turn())
+    if (chess.turn() !== color) {
+      this.send(socket, MessageType.ERROR_MESSAGE, "Not your turn.");
       return;
     }
-  
+
     // Handle specific move types
     switch (data.moveType) {
       case MoveTypes.CASTLING:
@@ -135,19 +146,26 @@ class Game {
         this.send(socket, MessageType.SUCCESS_MESSAGE, board);
         return;
     }
-  
-    // Send move updates to both players
-    if (this.player1 && this.player2) {
-      this.send(this.player1, MessageType.SUCCESS_MESSAGE, {
-        move: data,
-        board: chess.board(),
-      });
-      this.send(this.player2, MessageType.SUCCESS_MESSAGE, {
-        move: data,
-        board: chess.board(),
-      });
+
+    if (!data.from || !data.to) {
+      this.send(socket, MessageType.ERROR_MESSAGE, "Invalid Payload.");
+      return;
     }
-  
+
+    try {
+      const move = chess.move({from: data.from, to: data.to});
+      if (!move) {
+        this.send(socket, MessageType.ERROR_MESSAGE, "Illegal Move.");
+        return;
+      }
+    } catch (e) {
+      this.send(socket, MessageType.ERROR_MESSAGE, "Illegal Move.");
+      return;
+    }
+
+    // Send move updates to both players
+    this.sendBoard();
+
     // Check for checkmate
     if (chess.isCheckmate()) {
       this.send(enemySocket, MessageType.SUCCESS_MESSAGE, "You won!");

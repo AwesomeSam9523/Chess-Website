@@ -1,27 +1,16 @@
 "use client";
-import { Color, PieceSymbol, Square } from "chess.js";
-import { useEffect, useState } from "react";
+import {Color, PieceSymbol, Square} from "chess.js";
+import {useState} from "react";
+import {MoveTypes} from "@/app/hooks/types";
 
-export default function ChessBoard({
-  board,
-  chess,
-  setBoard,
-  socket,
-}: {
+export default function ChessBoard({ board, socket}: {
   board: ({
     square: Square;
     type: PieceSymbol;
     color: Color;
   } | null)[][];
-  chess: any;
-  setBoard: any;
   socket: WebSocket;
 }) {
-
-    
-    
-
-    
   const [from, setFrom] = useState<string | null>(null);
   const [to, setTo] = useState<string | null>(null);
 
@@ -35,31 +24,24 @@ export default function ChessBoard({
     const notation = toChessNotation(rowIndex, columnIndex);
     if (!from) {
       setFrom(notation);
-    } else {
-      try {
-        socket.send(
-          JSON.stringify({
-            moveType: 3,
-            from: from,
-            to: notation,
-          })
-        );
-
-        chess.move({ from: from, to: notation });
-        setBoard(chess.board());
-        // console.log({
-        //   from: from,
-        //   to: notation,
-        // });
-        setTo(null);
-        setFrom(null);
-      } catch (err) {
-        console.log(err);
-        setTo(null);
-        setFrom(null);
-      }
+      return;
     }
-  };
+    try {
+      socket.send(
+        JSON.stringify({
+          moveType: MoveTypes.REGULAR,
+          from: from,
+          to: notation,
+        })
+      );
+      setTo(null);
+      setFrom(null);
+    } catch (err) {
+      console.log(err);
+      setTo(null);
+      setFrom(null);
+    }
+  }
 
   return (
     <div>
@@ -78,7 +60,8 @@ export default function ChessBoard({
                 } text-xl border border-black`}
                 key={columnIndex}
               >
-                {square?.color=="w" ?<div className="text-black">{square?.type}</div>:<div className="text-green-800">{square?.type}</div>}
+                {square?.color == "w" ? <div className="text-black">{square?.type}</div> :
+                  <div className="text-green-800">{square?.type}</div>}
               </button>
             ))}
           </div>
