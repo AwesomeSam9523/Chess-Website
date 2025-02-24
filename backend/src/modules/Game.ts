@@ -46,7 +46,7 @@ class Game {
     message: any,
     responseType: ResponseType = ResponseType.INFO
   ) {
-    if (socket.CLOSED) {
+    if (socket.readyState !== socket.OPEN) {
       return;
     }
     socket.send(
@@ -96,7 +96,7 @@ class Game {
         this.handleMessage(data, this.player2, this.player1);
     });
 
-    this.sendBoard()
+    this.sendBoard();
   }
 
   endGame() {
