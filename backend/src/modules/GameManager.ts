@@ -10,7 +10,6 @@ class GameManager {
   }
 
   addUser(roomId: string, socket: WebSocket) {
-    
     let game = this.findGame(roomId);
     if (!game) {
       game = new Game(roomId);

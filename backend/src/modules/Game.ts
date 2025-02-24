@@ -66,8 +66,16 @@ class Game {
         const newArr = Array.from(whiteBoard[i]);
         blackBoard.push(newArr.reverse());
       }
-      this.send(this.player1, MessageType.SUCCESS_MESSAGE, {board: whiteBoard, history: this.chess.history(), color: "w"}, ResponseType.BOARD);
-      this.send(this.player2, MessageType.SUCCESS_MESSAGE, {board: blackBoard, history: this.chess.history(), color: "b"}, ResponseType.BOARD);
+      this.send(this.player1, MessageType.SUCCESS_MESSAGE, {
+        board: whiteBoard,
+        history: this.chess.history(),
+        color: "w"
+      }, ResponseType.BOARD);
+      this.send(this.player2, MessageType.SUCCESS_MESSAGE, {
+        board: blackBoard,
+        history: this.chess.history(),
+        color: "b"
+      }, ResponseType.BOARD);
     }
   }
 
