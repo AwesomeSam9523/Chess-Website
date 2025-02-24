@@ -2,6 +2,7 @@
 import { Color, PieceSymbol, Square } from "chess.js";
 import { useState } from "react";
 import { MoveTypes } from "@/app/hooks/types";
+import Image from "next/image";
 
 export default function ChessBoard({
   board,
@@ -72,15 +73,12 @@ export default function ChessBoard({
                 key={columnIndex}
               >
                 {square ? (
-                  <img
+                  <Image
                     className="w-full p-2"
-                    src={
-                      `/${
-                        square.color === "b"
-                          ? square.type
-                          : square.type.toUpperCase().concat(" COPY")
-                      }` + ".png"
-                    }
+                    alt={square.type}
+                    width={50}
+                    height={50}
+                    src={`/${square.color}/${square.type}.svg`}
                   />
                 ) : null}
               </button>
