@@ -1,14 +1,14 @@
 "use client";
-import {useEffect, useState} from "react";
-import {useSocket} from "./hooks/useSocket";
+import { useEffect, useState } from "react";
+import { useSocket } from "./hooks/useSocket";
 import ChessBoard from "./components/ChessBoard";
-import {MessageType, ResponseType, ServerResponse} from "@/app/hooks/types";
+import { MessageType, ResponseType, ServerResponse } from "@/app/hooks/types";
 
 const Home = () => {
   const [board, setBoard] = useState(null);
   const socket = useSocket();
   const [roomId, setRoomId] = useState<string | null>(null);
-
+  const [color, setColor] = useState<"w" | "b" | null>(null);
   useEffect(() => {
     if (!socket) {
       console.log("Socket not connected");
@@ -28,6 +28,8 @@ const Home = () => {
         case ResponseType.BOARD:
           console.log("Board Updated");
           setBoard(data.message.board);
+          setColor(data.message.color);
+
           break;
         default:
           console.log("Unknown response type");
@@ -36,7 +38,7 @@ const Home = () => {
   }, [socket]);
 
   const joinRoom = () => {
-    socket?.send(JSON.stringify({roomId: roomId}));
+    socket?.send(JSON.stringify({ roomId: roomId }));
   };
 
   return (
@@ -47,21 +49,18 @@ const Home = () => {
           value={roomId || ""}
           type="text"
           placeholder="Enter Room Id"
-          className="w-[800px] border border-black px-8 py-4 text-4xl rounded-lg "
+          className="w-[400px] border border-black px-8 py-4 text-4xl rounded-lg "
         />
-        {JSON.stringify({roomId})}
+        {JSON.stringify({ roomId })}
         <button
           onClick={joinRoom}
           className="bg-green-600 w-fit text-white px-8 py-4 text-4xl mt-4 rounded-lg shadow-md hover:shadow-xl "
         >
           Join
         </button>
-        {socket && board && (
+        {socket && board && color && (
           <div>
-            <ChessBoard
-              socket={socket}
-              board={board}
-            />
+            <ChessBoard color={color} socket={socket} board={board} />
           </div>
         )}
       </div>
