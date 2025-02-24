@@ -17,7 +17,6 @@ function handleFirstRequest(event: MessageEvent) {
   let data: ConnectionPayload | null;
   try {
     data = JSON.parse(data_.toString());
-    console.log("roomId = " + data?.roomId);
   } catch (e) {
     socket.close(1000, "Invalid Payload");
     return;

@@ -24,11 +24,9 @@ class Game {
 
     if (this.player1) {
       this.player2 = socket;
-      console.log("player 2 joined");
       this.startGame();
     } else {
       this.player1 = socket;
-      console.log("Player 1 joined");
     }
   }
 
@@ -36,13 +34,7 @@ class Game {
     if ([this.player1, this.player2].indexOf(socket) === -1) {
       return;
     }
-    let leaveSocket: WebSocket | undefined;
-    if (this.player1 === socket) {
-      leaveSocket = this.player2;
-    } else {
-      leaveSocket = this.player1;
-    }
-
+    let leaveSocket = this.player1 === socket ? this.player2 : this.player1;
     if (!leaveSocket) return;
 
     leaveSocket.close(1000, "User left the game.");
@@ -54,7 +46,7 @@ class Game {
     message: any,
     responseType: ResponseType = ResponseType.INFO
   ) {
-    if (!socket) {
+    if (socket.CLOSED) {
       return;
     }
     socket.send(
@@ -84,7 +76,7 @@ class Game {
       return;
     }
 
-    console.log("game started in roomId", this.roomId);
+    console.log("Game started in roomId", this.roomId);
 
     this.player1.on("message", (data) => {
       if (this.player1 && this.player2)
@@ -100,9 +92,11 @@ class Game {
   }
 
   endGame() {
-    if (this.player1 && this.player2) {
-      this.send(this.player1, MessageType.SUCCESS_MESSAGE, "Game ended.");
-      this.send(this.player2, MessageType.SUCCESS_MESSAGE, "Game ended.");
+    if (this.player1 && !this.player1.CLOSED) {
+      this.player1.close(1000, "Game ended.");
+    }
+    if (this.player2 && !this.player2.CLOSED) {
+      this.player2.close(1000, "Game ended.");
     }
   }
 
@@ -120,9 +114,7 @@ class Game {
       return;
     }
 
-    const moveNumber = chess.history().length;
     const color = socket === this.player1 ? "w" : "b";
-    console.log(moveNumber, color, chess.turn())
     if (chess.turn() !== color) {
       this.send(socket, MessageType.ERROR_MESSAGE, "Not your turn.");
       return;
@@ -168,8 +160,8 @@ class Game {
 
     // Check for checkmate
     if (chess.isCheckmate()) {
-      this.send(enemySocket, MessageType.SUCCESS_MESSAGE, "You won!");
-      this.send(socket, MessageType.ERROR_MESSAGE, "You lost!");
+      this.send(enemySocket, MessageType.ERROR_MESSAGE, "You lost!");
+      this.send(socket, MessageType.ERROR_MESSAGE, "You won!");
       this.endGame();
     }
   }
